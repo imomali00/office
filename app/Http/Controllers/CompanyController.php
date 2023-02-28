@@ -5,14 +5,21 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Company\CompanyStoreRequest;
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class CompanyController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth')->except(['index', 'store', 'show']);
+        $this->authorizeResource(Company::class, 'company');
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
+        
         return response()->json([
             'companies' => Company::with('companyUsers')->get()
         ]);
@@ -30,6 +37,8 @@ class CompanyController extends Controller
         // $company->email = $request->email;
         // $company->company_site = $request->company_site;
         // $company->phone_number = $request->phone_number;
+
+        Gate::authorize('company', $company);
         
         // $company->save();
         return response()->json([
@@ -43,6 +52,9 @@ class CompanyController extends Controller
      */
     public function show(Company $company)
     {
+        Gate::authorize('company', $company);
+ 
+        // The action is authorized...
         return response()->json(['company' => $company]);
     }
 
@@ -51,6 +63,7 @@ class CompanyController extends Controller
      */
     public function update(CompanyStoreRequest $request, Company $company)
     {
+        Gate::authorize('company', $company);
        $company->update($request->all());
         
        
@@ -66,6 +79,7 @@ class CompanyController extends Controller
      */
     public function destroy(Company $company)
     {
+        Gate::authorize('company', $company);
         $company->delete();
     }
 }

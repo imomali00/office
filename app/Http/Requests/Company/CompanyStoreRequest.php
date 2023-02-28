@@ -22,6 +22,7 @@ class CompanyStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'user_id' =>[ auth()->user()->id],
             'company_name' => 'required|string',
             'boss_full_name' => 'required|string',
             'address' => 'required|string',
