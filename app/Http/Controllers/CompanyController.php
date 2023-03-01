@@ -3,26 +3,29 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Company\CompanyStoreRequest;
+use App\Interfaces\CompanyRepositoryInterface;
 use App\Models\Company;
+use App\Repositories\CompanyRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class CompanyController extends Controller
 {
-    public function __construct()
+    protected CompanyRepositoryInterface $companyRepository;
+    private CompanyRepositoryInterface $postRepository;
+
+    public function __construct(CompanyRepositoryInterface $companyRepository)
     {
+        $this->postRepository = $companyRepository;
         $this->middleware('auth')->except(['index', 'store', 'show']);
         $this->authorizeResource(Company::class, 'company');
     }
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): CompanyRepositoryInterface
     {
-        
-        return response()->json([
-            'companies' => Company::with('companyUsers')->get()
-        ]);
+        return $this->companyRepository;
     }
 
     /**
@@ -30,21 +33,7 @@ class CompanyController extends Controller
      */
     public function store(CompanyStoreRequest $request)
     {
-        $company = Company::create($request->all());
-        // $company->company_name = $request->company_name;
-        // $company->boss_full_name = $request->boss_full_name;
-        // $company->address = $request->address;
-        // $company->email = $request->email;
-        // $company->company_site = $request->company_site;
-        // $company->phone_number = $request->phone_number;
-
-        Gate::authorize('company', $company);
-        
-        // $company->save();
-        return response()->json([
-            'message' => 'Company Created',
-            'data' => $company
-        ]);
+        return $this->companyRepository->createCompany(\request());
     }
 
     /**
@@ -52,10 +41,7 @@ class CompanyController extends Controller
      */
     public function show(Company $company)
     {
-        Gate::authorize('company', $company);
- 
-        // The action is authorized...
-        return response()->json(['company' => $company]);
+        return $this->companyRepository->getCompanyById($company);
     }
 
     /**
@@ -63,15 +49,7 @@ class CompanyController extends Controller
      */
     public function update(CompanyStoreRequest $request, Company $company)
     {
-        Gate::authorize('company', $company);
-       $company->update($request->all());
-        
-       
-        return response()->json([
-            'status' => true,
-            'message' => 'Company Updated',
-            'company' => $company
-        ], 200);
+        return $this->companyRepository->updateCompany($company, $request->all());
     }
 
     /**
@@ -79,7 +57,6 @@ class CompanyController extends Controller
      */
     public function destroy(Company $company)
     {
-        Gate::authorize('company', $company);
-        $company->delete();
+        return $this->companyRepository->deleteCompany($company);
     }
 }
