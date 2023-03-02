@@ -3,19 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Employee\EmployeeStoreRequest;
+use App\Interfaces\EmployeeRepositoryInterface;
 use App\Models\Employee;
+use App\Repositories\EmployeeRepository;
 use Illuminate\Http\Request;
 
 class EmployeeController extends Controller
 {
+    protected EmployeeRepositoryInterface $employeeRepository;
+    private EmployeeRepositoryInterface $employeeRepositoryy;
+
+    public function __construct(EmployeeRepositoryInterface $employeeRepository)
+    {
+        $this->employeeRepositoryy = $employeeRepository;
+    }
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): \Illuminate\Http\JsonResponse
     {
-        return response()->json([
-            'employees' => Employee::get()
-        ]);
+        return $this->employeeRepository;
     }
 
     /**
@@ -23,12 +31,7 @@ class EmployeeController extends Controller
      */
     public function store(EmployeeStoreRequest $request)
     {
-        $employee = Employee::create($request->all());
-        return response()->json([
-            'message' => 'Employee Created',
-            'employees' => $employee
-        ]);
-
+        return $this->employeeRepository->createEmployee(\request());
     }
 
     /**
@@ -36,7 +39,7 @@ class EmployeeController extends Controller
      */
     public function show(Employee $employee)
     {
-        return response()->json(['employee' => $employee]);
+        return $this->employeeRepository->getEmployeeById($employee);
     }
 
     /**
@@ -44,14 +47,7 @@ class EmployeeController extends Controller
      */
     public function update(EmployeeStoreRequest $request, Employee $employee)
     {
-        $employee->update($request->all());
-        
-       
-        return response()->json([
-            'status' => true,
-            'message' => 'Employee Updated',
-            'company' => $employee
-        ], 200);
+        return $this->employeeRepository->updateEmployee($employee, $request->all());
     }
 
     /**
@@ -59,6 +55,6 @@ class EmployeeController extends Controller
      */
     public function destroy(Employee $employee)
     {
-        $employee->delete();
+        return $this->employeeRepository->deleteEmployee($employee);
     }
 }

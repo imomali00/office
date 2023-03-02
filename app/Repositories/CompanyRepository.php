@@ -21,7 +21,7 @@ class CompanyRepository implements CompanyRepositoryInterface
         ]);
     }
 
-    public function getCompanyById(int $companyId)
+    public function getCompanyById(int $companyId): \Illuminate\Http\JsonResponse
     {
         Gate::authorize('company', $companyId);
 
